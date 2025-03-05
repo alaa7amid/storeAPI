@@ -1,30 +1,32 @@
-const prisma = require('../../../prisma/prisamClint')
+const prisma = require('../../../prisma/prisamClint'); 
 
-exports.register = async (req , res) => {
-    const {name , username , passwrd , role , email , phone , address } = req.body;
-    try{
-        const user = prisma.user.findUnique({
-            where: {
-                username : username
-            }
-        })
+exports.register = async (req, res) => {
+    const { name, username, password, role, email, phone, address } = req.body;
+    try {
+        const user = await prisma.user.findUnique({ 
+            where: { username }
+        });
+
         if (!user) {
-            const new_user = prisma.user.create({
-            data : {
-                name ,
-                passwrd ,
-                role,
-                email , 
-                phone , 
-                address 
-            }
-        }) 
-            res.status(200).send("user created ")
+            const new_user = await prisma.user.create({ 
+                data: {
+                    name,
+                    username, 
+                    password,
+                    role,
+                    email,
+                    phone,
+                    address
+                }
+            });
+
+            return res.status(201).json({ message: "User created successfully", user: new_user });
         } else {
-            res.status(400).send("user already exist")
+            return res.status(400).json({ message: "User already exists" });
         }
 
-    }catch (err){
-        res.status(500).send("failed to create user")
+    } catch (err) {
+        console.error("Error creating user:", err);
+        return res.status(500).json({ message: "Failed to create user", error: err.message });
     }
-}
+};
